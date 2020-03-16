@@ -1,38 +1,58 @@
-import React from 'react';
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { compose } from 'redux';
-import { firestoreConnect } from 'react-redux-firebase';
- const Projectdetails = (props) => {
-    const id =  props.match.params.id;
-    //console.log(props);
+import { createProject } from '../../store/action/projectActions'
+import { Redirect } from 'react-router-dom'
+
+class CreateProject extends Component {
+  state = {
+    title: '',
+    content: ''
+  }
+  handleChange = (e) => {
+    this.setState({
+      [e.target.id]: e.target.value
+    })
+  }
+  handleSubmit = (e) => {
+    e.preventDefault();
+    // console.log(this.state);
+    this.props.createProject(this.state);
+    this.props.history.push('/');
+  }
+  render() {
+    const { auth } = this.props;
+    if (!auth.uid) return <Redirect to='/signin' /> 
     return (
-         <div  className="container section project-details">
-             <div className="card z-depth-0">
-                 <div className="card-content">
-                     <span className="card-tittle"> Project Title {id} </span>
-                     <p> Hello from Sawsaw phargraph its for news and News your are Welcome to my website,Hello from Sawsaw phargraph its for news and News your are Welcome to my website</p>
-                 </div>
-                 <div className="card-action grey lighten-4 grey-text">
-                     
-                 <div>Posted By Sawsaw</div>
-                 <div>26,august ,1am</div>
-                 </div>
-             </div>
-        </div>
-     );
- }
- const mapStateToProps = (state,ownProps) =>{
-   //  console.log(state);
-     const id = ownProps.props.match.params.id
-     const projects = state.firestore.data.projects
-     return{
+      <div className="container">
+        <form className="white" onSubmit={this.handleSubmit}>
+          <h5 className="grey-text text-darken-3">Create a New Project</h5>
+          <div className="input-field">
+            <input type="text" id='title' onChange={this.handleChange} />
+            <label htmlFor="title">Project Title</label>
+          </div>
+          <div className="input-field">
+            <textarea id="content" className="materialize-textarea" onChange={this.handleChange}></textarea>
+            <label htmlFor="content">Project Content</label>
+          </div>
+          <div className="input-field">
+            <button className="btn pink lighten-1">Create</button>
+          </div>
+        </form>
+      </div>
+    )
+  }
+}
 
-     }
- }
+const mapStateToProps = (state) => {
+  return {
+    auth: state.firebase.auth
+  }
+}
 
- export default compose(
-      connect(mapStateToProps),
- firestoreConnect([
-     { collection: 'projects' }
- ]))
- (Projectdetails);
+const mapDispatchToProps = dispatch => {
+  return {
+    createProject: (project) => dispatch(createProject(project))
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(CreateProject)
